@@ -62,7 +62,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.author == client.user:
+    if message.author == client.user or message.guild:
         return
 
     # Check for attachments in the message
