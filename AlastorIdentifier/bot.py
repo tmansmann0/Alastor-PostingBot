@@ -1,8 +1,9 @@
 import discord
+from discord import Intents
 import aiohttp
 import tensorflow as tf
 import numpy as np
-from PIL import Image, ImageSequence
+from PIL import Image, ImageSequence, ImageOps
 import io
 from dotenv import load_dotenv
 import os
@@ -11,28 +12,32 @@ import os
 load_dotenv()
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 
+# Define intents
+intents = Intents.default()
+intents.messages = True
+intents.guilds = True
+# Enable this if your bot processes messages content and your bot is verified.
+# intents.message_content = True
+
 # Load your TensorFlow model
 model = tf.saved_model.load('./')
 classes = ["alastor", "not-alastor", "charlie"]
 
-# Initialize Discord Client
-client = discord.Client()
-
+# Initialize Discord Client with intents
+client = discord.Client(intents=intents)
 
 async def download_image(url):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             return await response.read()
 
-
 def classify_image(image_bytes):
     img = Image.open(io.BytesIO(image_bytes)).convert('RGB')
-    img = img.resize((300, 300 * img.size[1] // img.size[0]), Image.ANTIALIAS)
+    img = img.resize((300, 300 * img.size[1] // img.size[0]), Image.Resampling.LANCZOS)
     inp_numpy = np.array(img)[None]
     inp = tf.constant(inp_numpy, dtype='float32')
     class_scores = model(inp)[0].numpy()
     return classes[class_scores.argmax()]
-
 
 async def process_gif(url):
     # Download the GIF
@@ -51,11 +56,9 @@ async def process_gif(url):
 
     return classify_image(image_bytes)
 
-
 @client.event
 async def on_ready():
     print(f'Logged in as {client.user}')
-
 
 @client.event
 async def on_message(message):
@@ -79,6 +82,5 @@ async def on_message(message):
         if class_detected == "alastor":
             await message.channel.send("Hello world")
 
-
-# Use the bot token from the .env file
+# Use the bot token from the .env file to run the client
 client.run(DISCORD_BOT_TOKEN)
