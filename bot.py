@@ -9,6 +9,7 @@ import io
 from dotenv import load_dotenv
 import os
 
+from quote_scraper import find_quotes
 from scoreboard import ScoreboardDB
 
 # Load environment variables
@@ -34,10 +35,15 @@ tree = app_commands.CommandTree(client)
 # Initialize the database for the scoreboard
 scoreboard_db = ScoreboardDB()
 
+# Scrape quotes
+quotes = find_quotes()
+
+
 async def download_image(url):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             return await response.read()
+
 
 def classify_image(image_bytes):
     img = Image.open(io.BytesIO(image_bytes)).convert('RGB')
@@ -46,6 +52,7 @@ def classify_image(image_bytes):
     inp = tf.constant(inp_numpy, dtype='float32')
     class_scores = model(inp)[0].numpy()
     return classes[class_scores.argmax()]
+
 
 async def process_gif(url):
     # Download the GIF
@@ -64,10 +71,12 @@ async def process_gif(url):
 
     return classify_image(image_bytes)
 
+
 @client.event
 async def on_ready():
     await tree.sync(guild=discord.Object(id=DISCORD_GUILD_ID))
     print(f'Logged in as {client.user}')
+
 
 @client.event
 async def on_message(message):
@@ -92,7 +101,8 @@ async def on_message(message):
 
 # Reward the user with a point if they send an alastor
 async def on_alastor_send(message):
-    await message.reply("You found Alastor! You get a point!")
+    random_quote = np.random.choice(quotes)
+    await message.reply(random_quote, mention_author=False)
     scoreboard_db.increment_score(message.author.id)
 
 
