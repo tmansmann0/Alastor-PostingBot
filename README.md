@@ -48,7 +48,7 @@ python bot.py
 The bot should now set up a database and begin running and listening to messages on your Discord server.
 
 ### Acknowledgments
-Big thanks to liner.ai for providing the super helpful training GUI and model exporting
-Thank you to Collin for beating me to making the bot actually good
-Copyright of underlying model data and quotes belongs to Spindlehorse Toons, Amazon, and A24 respsectively
+- Big thanks to liner.ai for providing the super helpful training GUI and model exporting
+- Thank you to Collin for beating me to making the bot actually good
+- Copyright of underlying model data and quotes belongs to Spindlehorse Toons, Amazon, and A24 respsectively
 
