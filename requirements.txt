@@ -1,1 +1,7 @@
-python-dotenv
+aiohttp==3.9.4
+discord.py==2.3.2
+numpy==1.22.0
+Pillow==10.3.0
+Pillow==10.3.0
+python-dotenv==1.0.1
+tensorflow==2.16.1
