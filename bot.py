@@ -8,14 +8,18 @@ from PIL import Image, ImageSequence, ImageOps
 import io
 from dotenv import load_dotenv
 import os
+import certifi
 
 from quote_scraper import find_quotes
 from scoreboard import ScoreboardDB
 
+# Set SSL_CERT_FILE environment variable to certifi's certificate bundle
+os.environ['SSL_CERT_FILE'] = certifi.where()
+
 # Load environment variables
 load_dotenv()
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
-DISCORD_GUILD_ID = os.getenv('DISCORD_GUILD_ID')
+DISCORD_GUILD_ID = int(os.getenv('DISCORD_GUILD_ID'))
 
 # Define intents
 intents = Intents.default()
@@ -47,7 +51,7 @@ async def download_image(url):
 
 def classify_image(image_bytes):
     img = Image.open(io.BytesIO(image_bytes)).convert('RGB')
-    img = img.resize((300, 300 * img.size[1] // img.size[0]), Image.Resampling.LANCZOS)
+    img = img.resize((300, 300 * img.size[1] // img.size[0]), Image.LANCZOS)  # Use Image.LANCZOS
     inp_numpy = np.array(img)[None]
     inp = tf.constant(inp_numpy, dtype='float32')
     class_scores = model(inp)[0].numpy()
@@ -80,7 +84,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.author == client.user or message.guild:
+    if message.author == client.user or message.guild.id != DISCORD_GUILD_ID:
         return
 
     # Check for attachments in the message
